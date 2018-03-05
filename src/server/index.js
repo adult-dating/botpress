@@ -26,7 +26,7 @@ module.exports = bp => {
     const app = express()
     app.use(compression())
     const server = http.createServer(app)
-    const port = bp.botfile.port
+    const port = bp.config.port
 
     await serveApi(app)
     await serveSocket(server)

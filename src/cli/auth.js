@@ -15,14 +15,14 @@ const AUTH_FILE = '.auth.json'
 const getDataDir = () => {
   const projectPath = path.resolve('.')
 
-  const botfile = path.join(projectPath, 'botfile.js')
-  if (!fs.existsSync(botfile)) {
-    util.print.error(`(fatal) No ${chalk.bold('botfile.js')} file found at: ` + botfile)
+  const coreConfig = path.join(projectPath, 'config/core.json')
+  if (!fs.existsSync(coreConfig)) {
+    util.print.error(`(fatal) No ${chalk.bold('config/core.json')} file found at: ` + coreConfig)
     process.exit(1)
   }
 
   // eslint-disable-next-line no-eval
-  const bf = eval('require')(botfile)
+  const bf = eval('require')(coreConfig)
   return util.getDataLocation(bf.dataDir, projectPath)
 }
 

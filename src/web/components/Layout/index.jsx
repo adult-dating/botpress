@@ -18,6 +18,7 @@ import SelectContentManager from '~/components/Content/Select/Manager'
 import Dashboard from '~/views/Dashboard'
 import Manage from '~/views/Manage'
 import Middleware from '~/views/Middleware'
+import Settings from '~/views/Settings'
 import Content from '~/views/Content'
 import GhostContent from '~/views/GhostContent'
 import FlowBuilder from '~/views/FlowBuilder'
@@ -63,6 +64,7 @@ class Layout extends React.Component {
               <Route exact path="/dashboard" component={Dashboard} />
               <Route exact path="/manage" component={Manage} />
               <Route exact path="/middleware" component={Middleware} />
+              <Route exact path="/settings" component={Settings} />
               <Route exact path="/content" component={Content} />
               <Route exact path="/version-control" component={GhostContent} />
               <Route exact path="/flows/:flow?" component={FlowBuilder} />

@@ -35,20 +35,21 @@ const prepareDb = async () => {
   return knex
 }
 
-const defaults = {
-  contentDir: './content',
-  contentDataDir: './content_data'
-}
-
-module.exports = async ({ botfile, projectLocation, logger, ghostManager }) => {
+module.exports = async ({
+  projectLocation,
+  logger,
+  ghostManager,
+  contentPath = './content',
+  contentDataPath = './content_data'
+}) => {
   const categories = []
   const categoryById = {}
   const fileById = {}
 
   const getItemProviders = {}
 
-  const contentDir = path.resolve(projectLocation, botfile.contentDir || defaults.contentDir)
-  const contentDataDir = path.resolve(projectLocation, botfile.contentDataDir || defaults.contentDataDir)
+  const contentDir = path.resolve(projectLocation, contentPath)
+  const contentDataDir = path.resolve(projectLocation, contentDataPath)
 
   const knex = await prepareDb()
 

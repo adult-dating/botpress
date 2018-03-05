@@ -35,7 +35,7 @@ const maybeApply = (name, fn) => {
 module.exports = bp => {
   const _authenticationMiddleware = async (req, res, next) => {
     res.maybeSendRequireLogin = () => {
-      if (!bp.botfile.login.enabled) {
+      if (!bp.config['login.enabled']) {
         res.status(400).send({
           message: 'Login must be turned on for this API method'
         })
@@ -46,7 +46,7 @@ module.exports = bp => {
       }
     }
 
-    if (!bp.botfile.login.enabled) {
+    if (!bp.config['login.enabled']) {
       return next()
     }
 
@@ -160,7 +160,7 @@ module.exports = bp => {
     installProtector(app)
     installMaybeUse(app)
 
-    app.maybeUse('bodyParser.json', bodyParser.json({ limit: _.get(bp.botfile, 'api.bodyMaxSize') || '1mb' }))
+    app.maybeUse('bodyParser.json', bodyParser.json({ limit: _.get(bp.config, 'api.bodyMaxSize') || '1mb' }))
     app.maybeUse('bodyParser.urlencoded', bodyParser.urlencoded({ extended: true }))
 
     anonymousApis(bp, app)

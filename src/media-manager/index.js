@@ -1,10 +1,8 @@
 import path from 'path'
 import { safeId } from '../util'
 
-const defaultDir = './media'
-
-module.exports = ({ botfile, logger, ghostManager, projectLocation }) => {
-  const mediaDir = path.resolve(projectLocation, botfile.mediaDir || defaultDir)
+module.exports = ({ mediaPath = './media', logger, ghostManager, projectLocation }) => {
+  const mediaDir = path.resolve(projectLocation, mediaPath)
 
   ghostManager.addRootFolder(mediaDir, { isBinary: true })
 

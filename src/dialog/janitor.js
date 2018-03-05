@@ -4,11 +4,11 @@ import moment from 'moment'
 import _ from 'lodash'
 import Promise from 'bluebird'
 
-module.exports = ({ db, botfile, middlewares }) => {
+module.exports = ({ db, middlewares, janitorInterval = '30s', timeoutInterval = '15m' }) => {
   let intervalRef = null
 
-  const defaultJanitorInterval = ms(_.get(botfile, 'dialogs.janitorInterval') || '30s')
-  const defaultTimeout = ms(_.get(botfile, 'dialogs.timeoutInterval') || '15m')
+  const defaultJanitorInterval = ms(janitorInterval || '30s')
+  const defaultTimeout = ms(timeoutInterval || '15m')
 
   const checkStaleSessions = async () => {
     const knex = await db.get()

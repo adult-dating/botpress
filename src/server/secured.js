@@ -7,6 +7,7 @@ import Promise from 'bluebird'
 
 import util from '../util'
 import ExtraApiProviders from '+/api'
+import options from '../options'
 
 let logsSecret = nanoid()
 
@@ -30,6 +31,41 @@ module.exports = (bp, app) => {
       }
     })
     res.send(modules)
+  })
+
+  bp.ghostManager.addRootFolder('./config', { filesGlob: '**/*.json' }) // TODO: should be moved to appropriate module
+  app.secure('read', 'settings/list').get('/api/settings', async (req, res) => {
+    const withValues = async (moduleName, options) => {
+      const configText = await bp.ghostManager.readFile('./config', `${moduleName}.json`)
+      const config = configText ? JSON.parse(configText) : {}
+
+      return [
+        moduleName,
+        _.fromPairs(
+          _.map(options, (option, optionName) => {
+            return [optionName, { ...option, value: config[optionName] }]
+          })
+        )
+      ]
+    }
+
+    return res.send({
+      ..._.fromPairs([await withValues('core', options)]),
+      ..._.fromPairs(
+        await Promise.all(
+          _.map(bp._loadedModules, ({ name, configuration: { options } }) =>
+            withValues(util.getModuleShortname(name), options)
+          )
+        )
+      )
+    })
+  })
+
+  app.secure('write', 'settings/list').post('/api/settings/:module', async (req, res) => {
+    bp.restart(1000)
+    res.send(
+      await bp.ghostManager.upsertFile('./config', `${req.params.module}.json`, JSON.stringify(req.body, null, 2))
+    )
   })
 
   app.secure('read', 'middleware/list').get('/api/middlewares', (req, res) => {

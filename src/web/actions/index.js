@@ -136,11 +136,10 @@ export const fetchBotInformation = () => dispatch => {
 
 // Modules
 export const modulesReceived = createAction('MODULES/RECEIVED')
-export const fetchModules = () => dispatch => {
+export const fetchModules = () => dispatch =>
   axios.get('/api/modules').then(res => {
     dispatch(modulesReceived(res.data))
   })
-}
 
 // Rules
 export const rulesReceived = createAction('RULES/RECEIVED')

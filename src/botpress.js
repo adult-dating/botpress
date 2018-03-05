@@ -61,6 +61,14 @@ const mkdirIfNeeded = (path, logger) => {
 }
 
 const REQUIRED_PROPS = ['botUrl']
+const requireContent = (projectPath, relPath) => eval('require')(path.join(projectPath, relPath)) // eslint-disable-line no-eval
+const extract = (config, subgroup) => {
+  if (config[subgroup]) {
+    return config[subgroup]
+  }
+  const keys = Object.keys(config).filter(key => key.startsWith(`${subgroup}.`))
+  return _.fromPairs(keys.map(key => [key.replace(`${subgroup}.`, ''), config[key]]))
+}
 
 /**
  * Global context botpress
@@ -69,33 +77,30 @@ class botpress {
   /**
    * Create botpress
    *
-   * @param {string} obj.botfile - the config path
+   * @param {string} obj.projectPath - the project path
    */
-  constructor({ botfile }) {
+  constructor({ projectPath }) {
     this.version = getBotpressVersion()
-    /**
-     * The project location, which is the folder where botfile.js located
-     */
-    this.projectLocation = path.dirname(botfile)
+    this.projectLocation = projectPath
+    this._setupEnv() // Setup env with dotenv *before* requiring the config config
 
-    /**
-     * Setup env with dotenv *before* requiring the botfile config
-     */
-    this._setupEnv()
-
-    /**
-     * The botfile config object
-     */
-    // eslint-disable-next-line no-eval
-    this.botfile = eval('require')(botfile)
+    this.config = {
+      ...requireContent(projectPath, 'config/core.json'),
+      ..._.fromPairs(
+        fs
+          .readdirSync('./config')
+          .filter(fileName => fileName !== 'core.json')
+          .map(fileName => [fileName.replace('.json', ''), requireContent(projectPath, `config/${fileName}`)])
+      )
+    }
 
     for (const prop of REQUIRED_PROPS) {
-      if (!(prop in this.botfile)) {
+      if (!(prop in this.config)) {
         throw new Error(`Missing required botpress setting: ${prop}`)
       }
     }
 
-    this.stats = stats(this.botfile)
+    this.stats = stats(this.config)
 
     this.interval = null
   }
@@ -123,15 +128,15 @@ class botpress {
     // the bot's location is kept in this.projectLocation
     process.chdir(path.join(__dirname, '../'))
 
-    const { projectLocation, botfile } = this
+    const { projectLocation, config } = this
 
     const isFirstRun = fs.existsSync(path.join(projectLocation, '.welcome'))
-    const dataLocation = getDataLocation(botfile.dataDir, projectLocation)
-    const modulesConfigDir = getDataLocation(botfile.modulesConfigDir, projectLocation)
+    const dataLocation = getDataLocation(config.dataDir, projectLocation)
+    const modulesConfigDir = getDataLocation(config.modulesConfigDir, projectLocation)
     const dbLocation = path.join(dataLocation, 'db.sqlite')
     const version = packageJson.version
 
-    const logger = createLogger(dataLocation, botfile.log)
+    const logger = createLogger(dataLocation, extract(config, 'log'))
     mkdirIfNeeded(dataLocation, logger)
     mkdirIfNeeded(modulesConfigDir, logger)
 
@@ -139,12 +144,12 @@ class botpress {
 
     const db = createDatabase({
       sqlite: { location: dbLocation },
-      postgres: botfile.postgres
+      postgres: extract(config, 'postgres')
     })
 
     const security = createSecurity({
       dataLocation,
-      securityConfig: botfile.login,
+      securityConfig: extract(config, 'login'),
       db
     })
 
@@ -166,13 +171,13 @@ class botpress {
       projectLocation,
       version,
       db,
-      botfile,
+      license: extract(config, 'license'),
       bp: this
     })
     const middlewares = createMiddlewares(this, dataLocation, projectLocation, logger)
     const { hear, middleware: hearMiddleware } = createHearMiddleware()
     const { middleware: fallbackMiddleware } = createFallbackMiddleware(this)
-    const emails = createEmails({ emailConfig: botfile.emails })
+    const emails = createEmails({ emailConfig: extract(config, 'emails') })
     const mediator = createMediator(this)
 
     const users = createUsers({ db })
@@ -180,16 +185,17 @@ class botpress {
       projectLocation,
       logger,
       db,
-      enabled: !!_.get(botfile, 'ghostContent.enabled')
+      enabled: Boolean(_.get(config, 'ghostContent.enabled'))
     })
     const contentManager = await createContentManager({
       logger,
       projectLocation,
-      botfile,
+      contentPath: config.contentDir,
+      contentDataPath: config.contentDataDir,
       ghostManager
     })
     const mediaManager = await createMediaManager({
-      botfile,
+      mediaDir: config.mediaDir,
       logger,
       ghostManager,
       projectLocation
@@ -205,12 +211,16 @@ class botpress {
       middlewares,
       db,
       contentManager,
-      botfile
+      botUrl: config.botUrl
     })
 
     const stateManager = StateManager({ db })
-    const flowProvider = new FlowProvider({ logger, projectLocation, botfile, ghostManager })
-    const dialogJanitor = new DialogJanitor({ db, middlewares, botfile })
+    const flowProvider = new FlowProvider({ logger, projectLocation, config, ghostManager })
+    const dialogJanitor = new DialogJanitor({
+      db,
+      middlewares,
+      ...extract(config, 'dialogs')
+    })
     const dialogEngine = new DialogEngine({ flowProvider, stateManager, logger })
 
     const skillsManager = new SkillsManager({ logger })
@@ -224,12 +234,12 @@ class botpress {
     dialogJanitor.install()
 
     const incomingQueue = new Queue('Incoming', logger, {
-      redis: botfile.redis
+      redis: extract(config, 'redis')
     })
     incomingQueue.subscribe(job => middlewares.sendIncomingImmediately(job.event))
 
     const outgoingQueue = new Queue('Outgoing', logger, {
-      redis: botfile.redis
+      redis: extract(config, 'redis')
     })
     outgoingQueue.subscribe(job => middlewares.sendOutgoingImmediately(job.event))
 
@@ -307,11 +317,11 @@ class botpress {
         mod.handlers.ready && mod.handlers.ready(this, mod.configuration, createHelpers)
       }
 
-      const { botUrl } = botfile
+      const { botUrl } = config
       logger.info(chalk.green.bold(`Bot launched. Visit: ${botUrl}`))
     })
 
-    const middlewareAutoLoading = _.get(botfile, 'middleware.autoLoading')
+    const middlewareAutoLoading = _.get(config, 'middleware.autoLoading')
     if (!_.isNil(middlewareAutoLoading) && middlewareAutoLoading === false) {
       logger.debug('Middleware Auto Loading was disabled. Call bp.middlewares.load() manually.')
     } else {

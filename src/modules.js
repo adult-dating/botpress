@@ -53,7 +53,7 @@ module.exports = (logger, projectLocation, dataLocation, kvs) => {
         mod.configuration = createConfig({
           kvs: kvs,
           name: mod.name,
-          botfile: botpress.botfile,
+          config: botpress.config,
           projectLocation,
           options: loader.config || {}
         })

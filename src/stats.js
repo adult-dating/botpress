@@ -3,7 +3,7 @@ import crypto from 'crypto'
 import ua from 'universal-analytics'
 import { machineId } from 'node-machine-id'
 
-module.exports = botfile => {
+module.exports = config => {
   let visitor = null
   let queued = []
 
@@ -20,7 +20,7 @@ module.exports = botfile => {
     })
 
   const track = (category, action, label = null, value = null) => {
-    if (!!botfile.optOutStats) {
+    if (Boolean(config.optOutStats)) {
       return // Don't track if bot explicitly opted out from stats collection
     }
 
@@ -35,7 +35,7 @@ module.exports = botfile => {
   }
 
   const trackException = message => {
-    if (!!botfile.optOutStats) {
+    if (Boolean(config.optOutStats)) {
       return // Don't track if bot explicitly opted out from stats collection
     }
 

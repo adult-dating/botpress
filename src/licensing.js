@@ -8,7 +8,7 @@ import listeners from './listeners'
 import { resolveProjectFile } from './util'
 import LicenseGuard from '+/license'
 
-module.exports = ({ logger, version, projectLocation, db, botfile, bp }) => {
+module.exports = ({ logger, version, projectLocation, db, license, bp }) => {
   const licensesPath = path.join(__dirname, '../licenses')
 
   const getLicenses = () => {
@@ -73,7 +73,7 @@ Botpress: ${bp.version}`
     }
   })
 
-  const guard = LicenseGuard(logger, db, botfile)
+  const guard = LicenseGuard(logger, db, { license })
   guard.start()
 
   return {

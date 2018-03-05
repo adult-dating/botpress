@@ -100,34 +100,19 @@ const overwriteFromEnvValues = (options, object) => {
   })
 }
 
-const overwriteFromBotfileValues = (config_name, options, botfile, object) => {
-  return _.mapValues(object, (_v, name) => {
-    if (
-      botfile &&
-      botfile.config &&
-      botfile.config[config_name] &&
-      typeof botfile.config[config_name][name] !== 'undefined'
-    ) {
-      return botfile.config[config_name][name]
-    }
-
-    return _v
-  })
-}
-
 const overwriteFromConfigFileValues = async (config_name, options, projectLocation, object) => {
   if (!projectLocation) {
     return object
   }
 
-  const configFilePath = path.resolve(projectLocation, `${config_name}.config.yml`)
+  const configFilePath = path.resolve(projectLocation, `/config/${util.getModuleShortname(config_name)}.json`)
 
   if (!fs.existsSync(configFilePath)) {
     return object
   }
 
   const configFromFile = await Promise.fromCallback(callback => {
-    yaml.safeLoadAll(fs.readFileSync(configFilePath), value => callback(null, value))
+    JSON.parse(fs.readFileSync(configFilePath), value => callback(null, value))
   })
 
   return _.mapValues(object, (_v, name) => {
@@ -167,7 +152,6 @@ const createConfig = ({ kvs, name, botfile = {}, options = {}, projectLocation =
     return kvs
       .get('__config', name)
       .then(all => overwriteFromDefaultValues(options, all || {}))
-      .then(all => overwriteFromBotfileValues(name, options, botfile, all))
       .then(all => overwriteFromConfigFileValues(name, options, projectLocation, all))
       .then(all => overwriteFromEnvValues(options, all))
       .then(all => removeUnusedKeys(options, all))
@@ -177,7 +161,6 @@ const createConfig = ({ kvs, name, botfile = {}, options = {}, projectLocation =
     return kvs
       .get('__config', name + '.' + name)
       .then(value => overwriteFromDefaultValues(options, { [name]: value }))
-      .then(all => overwriteFromBotfileValues(name, options, botfile, all))
       .then(all => overwriteFromConfigFileValues(name, options, projectLocation, all))
       .then(all => overwriteFromEnvValues(options, all))
       .then(obj => obj[name])

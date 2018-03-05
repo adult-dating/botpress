@@ -52,7 +52,7 @@ Below is the full Ghost Manager API, please keep it up to date.
 
 You need to call this method **once** for each use-case (like it's called once in the Content Manager).
 
-The `rootFolder` is the entry point under which all the files we care about (in this specifc use-case) are located. The files can be nested arbitrary. The folder is _relative to the bot root directory_, also know as `projectLocation` (the directory where the `botfile.js` is located). The folder must exist before calling this method.
+The `rootFolder` is the entry point under which all the files we care about (in this specifc use-case) are located. The files can be nested arbitrary. The folder is _relative to the bot root directory_, also know as `projectLocation`. The folder must exist before calling this method.
 
 The `filesGlob` is a [glob](https://www.npmjs.com/package/glob) to indicate which files we want to be tracked by the Ghost Manager. Only files matching this glob will be affected.
 

@@ -24,7 +24,7 @@ const BASIC_MENU_ITEMS = [
     name: 'Modules',
     path: '/manage',
     rule: { res: 'modules/list', op: 'read' },
-    icon: 'build'
+    icon: 'list'
   },
   window.GHOST_ENABLED && {
     name: 'Version Control',
@@ -50,6 +50,12 @@ const BASIC_MENU_ITEMS = [
     path: '/middleware',
     rule: { res: 'middleware', op: 'read' },
     icon: 'settings'
+  },
+  {
+    name: 'Settings',
+    path: '/settings',
+    rule: { res: 'middleware', op: 'read' },
+    icon: 'build'
   }
 ].filter(Boolean)
 

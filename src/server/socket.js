@@ -9,7 +9,7 @@ module.exports = bp => {
     const admin = io.of('/admin')
     const guest = io.of('/guest')
 
-    if (bp.botfile.login.enabled) {
+    if (bp.config['login.enabled']) {
       admin.use(
         socketioJwt.authorize({
           secret: await bp.security.getSecret(),

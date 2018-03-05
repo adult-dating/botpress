@@ -120,8 +120,8 @@ export default class GuidedTour extends React.Component {
             for production environments
           </li>
           <li>
-            Do <strong>not</strong> store keys, passwords or any sensitive information in your botfile. Use environment
-            variables instead.
+            Do <strong>not</strong> store keys, passwords or any sensitive information in your config-files. Use
+            environment variables instead.
           </li>
           <li>
             Switch to the <b>Botpress License</b> (the default license is AGPL), which is 100% free for all bots and

@@ -7,7 +7,7 @@ const callSubflowRegex = /(.+\.flow\.json)\s?@?\s?(.+)?/i // e.g. './login.flow.
 const MAX_STACK_SIZE = 100
 
 class DialogEngine {
-  constructor({ flowProvider, stateManager, options, logger = loggerShim }) {
+  constructor({ flowProvider, stateManager, logger = loggerShim, options = {} }) {
     Object.assign(this, { logger, flowProvider, stateManager })
 
     this.flowsLoaded = false

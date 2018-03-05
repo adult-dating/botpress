@@ -9,17 +9,9 @@ import mkdirp from 'mkdirp'
 import { validateFlowSchema } from './validator'
 
 export default class FlowProvider extends EventEmitter2 {
-  constructor({ logger, botfile, projectLocation, ghostManager }) {
-    super({
-      wildcard: true,
-      maxListeners: 100
-    })
-
-    this.logger = logger
-    this.botfile = botfile
-    this.projectLocation = projectLocation
-    this.ghostManager = ghostManager
-    this.flowsDir = this.botfile.flowsDir || './flows'
+  constructor({ logger, ghostManager, flowsDir = './flows' }) {
+    super({ wildcard: true, maxListeners: 100 })
+    Object.assign(this, { logger, ghostManager, flowsDir })
 
     mkdirp.sync(path.dirname(this.flowsDir))
     this.ghostManager.addRootFolder(this.flowsDir, { filesGlob: '**/*.json' })

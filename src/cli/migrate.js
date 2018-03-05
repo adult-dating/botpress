@@ -8,7 +8,7 @@ import Promise from 'bluebird'
 module.exports = fromVersion => {
   stats({}).track('cli', 'migration', fromVersion)
 
-  if (!fs.existsSync('./botfile.js')) {
+  if (!fs.existsSync('./config/core.json')) {
     throw new Error('You must be inside a bot directory to run a migration')
   }
 

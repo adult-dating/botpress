@@ -4,7 +4,7 @@ import Promise from 'bluebird'
 import Engine from './engine'
 import Proactive from './proactive'
 
-module.exports = ({ logger, middlewares, db, contentManager, botfile }) => {
+module.exports = ({ logger, middlewares, db, contentManager, botUrl }) => {
   const processors = {} // A map of all the platforms that can process outgoing messages
   const renderers = {} // A map of all the registered renderers
 
@@ -88,7 +88,7 @@ module.exports = ({ logger, middlewares, db, contentManager, botfile }) => {
 
     // "magic" constants that can be used in the renderers
     const initialData = {
-      BOT_URL: botfile.botUrl
+      BOT_URL: botUrl
     }
 
     if (rendererName.startsWith('!')) {

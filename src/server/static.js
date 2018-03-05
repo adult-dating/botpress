@@ -94,10 +94,11 @@ module.exports = bp => {
     }
 
     app.use('/js/env.js', (req, res) => {
-      const { tokenExpiry, enabled: authEnabled } = bp.botfile.login
-      const { enabled: ghostEnabled } = bp.botfile.ghostContent
-      const optOutStats = !!bp.botfile.optOutStats
-      const appName = bp.botfile.appName || 'Botpress'
+      const tokenExpiry = bp.config['login.tokenExpiry']
+      const authEnabled = bp.config['login.enabled']
+      const ghostEnabled = bp.config['ghostContent.enabled']
+      const optOutStats = !!bp.config.optOutStats
+      const appName = bp.config.appName || 'Botpress'
 
       const { isFirstRun, version } = bp
       res.contentType('text/javascript')

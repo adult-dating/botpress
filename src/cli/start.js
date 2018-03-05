@@ -22,8 +22,7 @@ const getPath = path => {
  * It will do the following things:
  *
  * 1. Find botpress instance creator in `node_modules` folder in current project.
- * 2. Find the `botfile.js` which will be injected into the creator to create the instance.
- * 3. Start the botpress instance.
+ * 2. Start the botpress instance.
  */
 module.exports = (projectPath, options) => {
   let Botpress = null
@@ -51,15 +50,15 @@ module.exports = (projectPath, options) => {
     process.exit(1)
   }
 
-  const botfile = path.join(projectPath, 'botfile.js')
-  if (!fs.existsSync(botfile)) {
-    util.print('error', `(fatal) No ${chalk.bold('botfile.js')} file found at: ` + botfile)
+  const config = path.join(projectPath, 'config/core.json')
+  if (!fs.existsSync(config)) {
+    util.print('error', `(fatal) No ${chalk.bold('config/core.json')} file found at: ` + config)
     process.exit(1)
   }
 
   const getDefaultWatchIgnore = () => {
     // eslint-disable-next-line no-eval
-    const bf = eval('require')(botfile)
+    const bf = eval('require')(config)
     const dataDir = util.getDataLocation(bf.dataDir, projectPath)
     const modulesConfigDir = util.getDataLocation(bf.modulesConfigDir, projectPath)
     return [dataDir, modulesConfigDir, 'node_modules']
@@ -92,7 +91,7 @@ module.exports = (projectPath, options) => {
       setTimeout(() => process.exit(), 100)
     })
   } else {
-    const bot = new Botpress({ botfile })
+    const bot = new Botpress({ projectPath })
     bot.start()
   }
 }
